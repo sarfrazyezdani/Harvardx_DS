@@ -353,10 +353,71 @@ boxplot(palmitic~region, data=olive)
 
 #Section 4: Programming Basics-----------------------------
 ##For Loops------------------------------------------------
+###Arithematic Addition
+compute_s_n <- function(n){
+  x <- 1:n
+  sum(x)
+} ###Function defined for n values. x is a series of 
+###integers from 1 to n and y is equal sum of this series.
+compute_s_n(15)
+###Loops
+### For Loop - define the range that the variable's function
+###is executed.
 
+### General form of For Loop - for(i in range of values) {
+### operations that use i, which is changing across the 
+### range of values
+### }
 
+###For Loop example
+for (i in 1:5) {
+  print(i)
+}
 
+###For Loop example
+m <- 25
+#### create an empty vector
+s_n <- vector(length=m)
+for (i in 1:m) {
+    s_n[i] <- compute_s_n(i)
+}
+s_n
+
+i<- 1:m
+
+plot(i,s_n)
+lines(i, (i*(i+1))/2)
+
+### other functions
+### Functions more readily used in place of FOR loops
+### - apply, sapply, tapply, mapply - Apply Family
+### split, cut, quantile, reduce, identical, unique are some
+### other functions as well.
 
 ##Section 4 Assessment-------------------------------------
-###End of Section------------------------------------------
+library(dslabs)
+data(heights)
 
+sum(ifelse(heights$sex=="Male",2,1))
+mean(ifelse(heights$height>72,heights$height,0))
+
+inches_to_ft <- function(n){
+  n<- n/12
+  n
+}
+sum(inches_to_ft(heights$height)<5)
+
+
+# define a vector of length m
+
+m <- 10
+f_n <- vector(length = m)
+for (n in 1:m) {
+    f_n[n] <- factorial(n)
+}
+
+# inspect f_n
+f_n
+f_n(2)
+
+###End of Section------------------------------------------
