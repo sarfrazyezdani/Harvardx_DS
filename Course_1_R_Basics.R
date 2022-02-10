@@ -121,7 +121,8 @@ time <- round(time, digits =4)
 
 speed <- distance/time
 speed <- round(speed, 2)
-records <- data.frame(name=name, distance=distance, time=time, speed=speed)
+records <- data.frame(name=name, distance=distance, 
+                      time=time, speed=speed)
 
 records
 
