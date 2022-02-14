@@ -445,8 +445,137 @@ p <- p + theme_economist()
 
 p
 
+## Other Examples - Histogram of Male Heights
+
+heights %>% filter(sex == "Male")
+
+p <- heights %>% filter(sex == "Male") %>% 
+  ggplot(aes(x = height))
+
+p + geom_histogram(binwidth = 1, fill='blue',col="Black", 
+                   size=1 ) +
+  xlab("Male Heights in inches") +
+  ggtitle("Histogram")
+
+## Smooth Densities 
+
+p + geom_density(size=1, fill='blue')
+
+## QQ Plots
+
+p <- heights %>% filter(sex == "Male") %>% 
+  ggplot(aes(sample = height))
+
+p + geom_qq() + geom_abline()
+
+
+### The QQ Plot by default uses Standard Normal Distribution
+### i.e. mean = 0, sd = 1. In order to change this, we need
+### to define dparams argument
+
+params <- heights %>% 
+  filter(sex =="Male") %>%
+  summarize(mean = mean(height), sd = sd(height))
+
+
+p + geom_qq(dparams = params) + geom_abline()
+
+### QQ Plot of scaled data against Standard Normal
+### Distribution
+
+heights%>%
+  ggplot(aes(sample=scale(height))) +
+  geom_qq() +
+  geom_abline()
+
+## Making Grids of Plots (Multiple Plots in one Plot)
+install.packages("gridExtra")
+library(gridExtra)
+
+p <- heights %>% 
+  filter(sex=="Male") %>% 
+  ggplot(aes(x = height))
+
+p1 <- p +
+  geom_histogram(binwidth = 1, fill = "blue", col="black")
+p2 <- p +
+  geom_histogram(binwidth = 2, fill = "blue", col="black")
+p3 <- p +
+  geom_histogram(binwidth = 3, fill = "blue", col="black")
+
+
+grid.arrange(p1,p2,p3, ncol=3)
+
 #Section 3: Summarizing with Dplyr--------------------------
 ##3.1 Summarizing with Dplyr--------------------------------
+
+## Summarize 
+
+library(tidyverse)
+library(dslabs)
+data(heights)
+
+### We'll compute the average and the sd for Males
+
+s <- heights %>% 
+  filter(sex=="Male") %>% 
+  summarize(  average= mean(height), 
+              standard_deviation = sd(height))
+
+s$average
+s$standard_deviation
+
+### Computing Median, Min, and Max
+
+heights %>%
+  filter(sex == "Male") %>%
+  summarize(median = median(height),
+            minimum= min(height),
+            maximum= max(height))
+
+### Computing median, min, and max using quantiles function
+
+quantile(heights$height, probs=c(0.5,0,1))
+
+### Remember: With the Function Summarize we can only call
+### functions that return a single value
+
+## dot placeholder
+data(murders)
+
+murders %>% mutate(murder_rate = total/population *10^6) %>%
+  summarize(murders=mean(murder_rate))
+
+### Note that the Actual US Average is not the Average of
+### State murder rates as the size of state should also be
+### taken into account. Thus, acutal murder rate should be
+### Total Murders/Total Population *1000000
+
+us_murder_rate <- murders %>%
+  summarize(rate = sum(total)/ sum(population) *10^5)
+us_murder_rate
+
+us_murder_rate 
+class(us_murder_rate)
+### The problem with this computation is still data.frame
+### and not a numeric even though it contains just one
+### numeric value. This can pose severe challenges in
+### functions that require only numeric values. In order to
+### resolve we use the concept of dot placeholder. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Section 4: Gapminder---------------------------------------
 ##4.1 Introduction to Gapminder-----------------------------
 #Section 5: Data Visualization Principles-------------------
