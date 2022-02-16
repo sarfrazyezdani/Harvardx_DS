@@ -1,12 +1,13 @@
-#Section 1: Introduction to Data Visualization and ---------
-#Distributions----------------------------------------------
-##1.1 Introduction to Data Visualization--------------------
+# Section 1: Introduction to Data Visualization and ---------
+# Distributions----------------------------------------------
+## 1.1 Introduction to Data Visualization--------------------
 data(murders)
 head(murders)
-##1.2 Introduction to Distributions-------------------------
+## 1.2 Introduction to Distributions-------------------------
 data(heights)
 prop.table(table(heights$sex))
-###CDF(Cumulative Distribution Function) for Dataset my_data
+### CDF(Cumulative Distribution Function) for Dataset
+### my_data
 library(tidyverse)
 library(dslabs)
 data(heights)
@@ -20,10 +21,10 @@ cdf_function <- function(x){
 cdf_values <- sapply(a, cdf_function)
 plot(a, cdf_function)
 
-###Smooth Density Plots
+### Smooth Density Plots
 hist(heights$height, equidist)
 
-###Normal Distribution
+### Normal Distribution
 avg <- function(x){
   sum(x)/length(x)
 }
@@ -225,11 +226,11 @@ theoretical_female_quantiles <- qnorm(p)
 plot(theoretical_female_quantiles,observed_female_quantiles)
 abline(0,1)
 
-#Section 2: Introduction to ggplot2-------------------------
-##2.1 Basics of ggplot2-------------------------------------
+# Section 2: Introduction to ggplot2-------------------------
+## 2.1 Basics of ggplot2-------------------------------------
 library(tidyverse)
 
-##Graph Components
+## Graph Components
 library(dslabs)
 library(murders)
 
@@ -240,7 +241,7 @@ p <- ggplot(data = murders) ### assigning ggplot of data to
                             ### an object.
 class(p)
 
-##2.2 Customizing Plots-------------------------------------
+## 2.2 Customizing Plots-------------------------------------
 
 ## Layers
 
@@ -335,7 +336,7 @@ p <- murders%>% ggplot(aes(population/10^6, total,
 p+geom_point(aes(color=region), size=3)
 
 
-###Average Rate Calculations for Murder Rates
+### Average Rate Calculations for Murder Rates
 
 r <- murders %>% 
   summarize(rate =(((sum(total))/
@@ -366,7 +367,7 @@ p <- murders%>% ggplot(aes(population/10^6, total,
   ylab("Total number of murders (Log scale)") +
   ggtitle("US Gun Murders in US 2010") 
 
-###In order to Caps the region to Region
+### In order to Caps the region to Region
 
 p <- p+ scale_color_discrete(name = "Region")
 
@@ -559,25 +560,415 @@ us_murder_rate
 class(us_murder_rate)
 ### The problem with this computation is still data.frame
 ### and not a numeric even though it contains just one
-### numeric value. This can pose severe challenges in
-### functions that require only numeric values. In order to
-### resolve we use the concept of dot placeholder. 
+### numeric value. And most of Dplyr functions work
+### similarly. This can pose severe challenges in functions
+### that require only numeric values. In order to resolve we
+### use the concept of dot placeholder.
 
+us_murder_rate %>% .$rate
 
+class(us_murder_rate %>% .$rate)
 
+### The above code can be replicated in the following way to
+### return a numeric value rather than a Data Frame.
 
+us_murder_rate <- murders %>%
+  summarize(rate = sum(total)/ sum(population) *10^5) %>%
+  .$rate
 
+us_murder_rate 
+class(us_murder_rate)
 
+##Group By - group then summarize 
 
+### Used when you need to group then summarize the data
+### frame into those different groups.
 
+heights %>% group_by(sex)
 
+### This generates a special data frame called "Group
+### DataFrame" and `summarize` function will act differently
+### on this object.
 
+class(heights%>%group_by(sex))
 
+heights %>% 
+  group_by(sex) %>% 
+  summarize(average = mean(height), 
+            standard_deviation = sd(height))
 
+### Another Example - Median Murder Rate in the Four
+### Different Regions of the Country
 
+murders <- murders%>% 
+  mutate(murder_rate = total/population *100000)
+
+murders %>% 
+  group_by(region) %>% 
+  summarize(median_rate = median(murder_rate)) 
+
+## Sorting Data Tables
+
+### In order to sort entire data tables we can use arrange()
+### in place of sort() and order()
+
+murders %>% arrange(population) %>% head() # Answer in 
+                              #ascending Order  is default
+
+murders %>% arrange(murder_rate) %>% head()
+
+### To arrange in descending order - use desc()
+
+murders %>% arrange(desc(murder_rate)) %>% head()
+
+### We can do nested sorting - sorting within sorting -
+### sort-ception!!
+
+murders %>% arrange(region, desc(murder_rate)) %>% head()
+
+#### Interestingly, the use of the head() is to limit the
+#### amount of data visible to around 6. That is only 6
+#### entries are displayed within our table. If we're to
+#### display like say TOP TEN then we should be using the
+#### top_n() function.
+
+murders %>% top_n(10, murder_rate) # Notice they're not 
+                                   # ordered.
+
+### In order to order them.
+
+murders %>% arrange(desc(murder_rate)) %>% top_n(10)
 
 #Section 4: Gapminder---------------------------------------
 ##4.1 Introduction to Gapminder-----------------------------
+###Case Study: Trends in World Health and Economics --------
+
+#### Question 1- Is it fair to say the world is divided into
+#### rich and poor?
+
+#### Question 2- Has income inequality worsened during the
+#### last 40 years?
+
+library(dslabs)
+data(gapminder)
+head(gapminder)
+library(tidyquant)
+library(tidyverse)
+
+### Q.1 Which country has the highest child mortality rate
+### Sri-Lanka vs. Turkey?
+
+### Q.2 Which pairs do you think are most similar?
+
+gapminder %>% filter(year == 2015 & 
+                       country %in% 
+                       c("Sri Lanka", "Turkey")) %>% 
+  select(country, infant_mortality)
+
+### Poland vs. South Korea
+
+gapminder %>% filter(year == 2015 & country %in% 
+                       c("Poland", "South Korea")) %>% 
+  select(country, infant_mortality)
+
+### Malaysia vs. Russia
+
+gapminder %>% filter(year == 2015 & country %in% 
+                       c("Malaysia", "Russia")) %>% 
+  select(country, infant_mortality)
+
+### Pakistan vs. Vietnam
+
+gapminder %>% filter(year == 2015 & country %in% 
+                       c("Pakistan", "Vietnam")) %>% 
+  select(country, infant_mortality)
+
+### Thailand vs. South Africa
+
+gapminder %>% filter(year == 2015 & country %in% 
+                       c("Thailand", "South Africa")) %>% 
+  select(country, infant_mortality)
+
+### Scatterplot of Life expectancy vs. Fertility rates
+
+ds_theme_set()
+filter(gapminder, year == 1962) %>% 
+  ggplot(aes(fertility, life_expectancy, color= continent, 
+             size = country[log10(population)]))+ 
+  geom_point()
+
+### But this was in 1962, is this still a reality?
+
+### Faceting
+
+filter(gapminder, year %in% c(1962,2012)) %>% 
+  ggplot(aes(fertility, life_expectancy, color= continent))+ 
+  geom_point() + 
+  facet_grid(continent~year)
+
+### but this show continents separately, but what about the
+### BIG PICTURE?
+
+gapminder %>% filter(year %in% c(1962,2012)) %>% 
+  ggplot(aes(fertility, life_expectancy, color= continent))+
+  geom_point() + facet_grid(.~year)
+
+### What about multiple time periods? For that use
+### Facet_wrap().
+
+years <- c(1962,1970,1980,1990,2000,2010,2012)
+
+continents <- c("Europe", "Asia")
+
+gapminder %>% 
+  filter(year %in% years & 
+                       continent %in% continents) %>% 
+  ggplot(aes(fertility, life_expectancy, col= continent))+
+  geom_point() + 
+  facet_wrap(~year)
+
+### Time Series Plots
+
+### US fertility Rates across the years
+
+gapminder %>% filter(country == "United States") %>% 
+  ggplot(aes(year, fertility)) + geom_point()
+
+
+### Fertility Rates comparison - US vs India
+gapminder %>% filter(country %in% 
+                       c("United States", "India")) %>% 
+  ggplot(aes(year, fertility, col= country)) + geom_point()
+
+### in lines
+
+gapminder %>% filter(country %in% 
+                       c("United States", "India", 
+                         "Germany", "South Korea")) %>% 
+  ggplot(aes(year, fertility, col=country)) + 
+  geom_line(size = 1)
+
+### For Time Series Plots - it is recommended to use labels
+### instead of legends. (Although Legends are generated
+### automatically and easier to generate)
+
+### Adding Labels
+countries <- c("South Korea", "Germany")
+labels <- data.frame(country = countries, x = c(1977, 1965),
+                     y = c(60, 72))
+gapminder %>% filter(country %in% countries) %>%
+  ggplot(aes(year, life_expectancy, col = country)) +
+  geom_line() +
+  geom_text(data = labels, aes(x, y, label = country), size = 4) +
+  theme(legend.position = "none")
+
+## Transformations
+
+gapminder <- gapminder %>% 
+  mutate(dollars_per_day = (gdp)/(population*365))
+
+### Scaled Function - You see values with powers of 2
+
+past_year <- 1970
+
+gapminder%>% 
+  filter(year == past_year & !is.na(gdp)) %>% 
+  ggplot(aes(log2(dollars_per_day))) +
+  geom_histogram(binwidth = 1, color="black")
+  
+
+
+### X- Axis Scaled - You see OG value on a Log scaled Axis
+
+gapminder%>% 
+  filter(year == past_year & !is.na(gdp)) %>% 
+  ggplot(aes(dollars_per_day)) +
+  geom_histogram(binwidth = 1, color="black") +
+  scale_x_continuous(trans="log2")
+
+
+### Stratify & Boxplots
+
+
+### Stratification is necessary to differentiate countries that are poor from rich.
+
+p <- gapminder %>%
+  filter(year == past_year & !is.na(gdp)) %>%
+  ggplot(aes(region, dollars_per_day))
+p + geom_boxplot()
+
+### rotating text
+
+p + geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+### reorder() - This function lets us change the order of
+### the levels of a factor variable based on a summary
+### computed on a numeric vector.
+
+#### Example
+
+fac <- factor(c("Asia", "Asia", "West", "West", "West"))
+
+levels(fac)
+
+value <- c(10, 11, 12, 6, 4)
+
+fac <- fac %>% reorder(value, FUN=mean)
+
+levels(fac)
+
+### Back to our original example
+
+p <- gapminder %>%
+  filter(year == past_year & !is.na(gdp)) %>%
+  mutate(region = reorder(region, dollars_per_day, 
+                          FUN = median)) %>%
+  ggplot(aes(region, dollars_per_day, fill = continent)) +
+  geom_boxplot() +
+  theme(axis.text = element_text(angle=90, hjust=1)) +
+  xlab("")
+
+p
+
+p + scale_y_continuous(trans = "log2")
+
+p + 
+  scale_y_continuous(trans = "log2") + 
+  geom_point(show.legend = FALSE)
+
+### Comparing Distributions
+
+west <- c("Western Europe", "Northern Europe", 
+          "Southern Europe", "Northern America", 
+          "Australia and New Zealand")
+
+
+
+
+
+
+#####################################################################################################################
+# add dollars per day variable and define past year
+gapminder <- gapminder %>%
+  mutate(dollars_per_day = gdp/population/365)
+past_year <- 1970
+
+# define Western countries
+west <- c("Western Europe", "Northern Europe", "Southern Europe", "Northern America", "Australia and New Zealand")
+
+# facet by West vs developing
+gapminder %>%
+  filter(year == past_year & !is.na(gdp)) %>%
+  mutate(group = ifelse(region %in% west, "West", "Developing")) %>%
+  ggplot(aes(dollars_per_day)) +
+  geom_histogram(binwidth = 1, color = "black") +
+  scale_x_continuous(trans = "log2") +
+  facet_grid(. ~ group)
+
+# facet by West/developing and year
+present_year <- 2010
+gapminder %>%
+  filter(year %in% c(past_year, present_year) & !is.na(gdp)) %>%
+  mutate(group = ifelse(region %in% west, "West", "Developing")) %>%
+  ggplot(aes(dollars_per_day)) +
+  geom_histogram(binwidth = 1, color = "black") +
+  scale_x_continuous(trans = "log2") +
+  facet_grid(year ~ group)
+
+
+# define countries that have data available in both years
+country_list_1 <- gapminder %>%
+  filter(year == past_year & !is.na(dollars_per_day)) %>% .$country
+country_list_2 <- gapminder %>%
+  filter(year == present_year & !is.na(dollars_per_day)) %>% .$country
+country_list <- intersect(country_list_1, country_list_2)
+
+# make histogram including only countries with data available in both years
+gapminder %>%
+  filter(year %in% c(past_year, present_year) & country %in% country_list) %>%    # keep only selected countries
+  mutate(group = ifelse(region %in% west, "West", "Developing")) %>%
+  ggplot(aes(dollars_per_day)) +
+  geom_histogram(binwidth = 1, color = "black") +
+  scale_x_continuous(trans = "log2") +
+  facet_grid(year ~ group)
+
+p <- gapminder %>%
+  filter(year %in% c(past_year, present_year) & country %in% country_list) %>%
+  mutate(region = reorder(region, dollars_per_day, FUN = median)) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("") + scale_y_continuous(trans = "log2")
+
+p + geom_boxplot(aes(region, dollars_per_day, fill = continent)) +
+  facet_grid(year ~ .)
+
+# arrange matching boxplots next to each other, colored by year
+p + geom_boxplot(aes(region, dollars_per_day, fill = factor(year)))
+
+
+# see the code below the previous video for variable definitions
+
+# smooth density plots - area under each curve adds to 1
+gapminder %>%
+  filter(year == past_year & country %in% country_list) %>%
+  mutate(group = ifelse(region %in% west, "West", "Developing")) %>% group_by(group) %>%
+  summarize(n = n()) %>% knitr::kable()
+
+# smooth density plots - variable counts on y-axis
+p <- gapminder %>%
+  filter(year == past_year & country %in% country_list) %>%
+  mutate(group = ifelse(region %in% west, "West", "Developing")) %>%
+  ggplot(aes(dollars_per_day, y = ..count.., fill = group)) +
+  scale_x_continuous(trans = "log2")
+p + geom_density(alpha = 0.2, bw = 0.75) + facet_grid(year ~ .)
+
+
+# add group as a factor, grouping regions
+gapminder <- gapminder %>%
+  mutate(group = case_when(
+    .$region %in% west ~ "West",
+    .$region %in% c("Eastern Asia", "South-Eastern Asia") ~ "East Asia",
+    .$region %in% c("Caribbean", "Central America", "South America") ~ "Latin America",
+    .$continent == "Africa" & .$region != "Northern Africa" ~ "Sub-Saharan Africa",
+    TRUE ~ "Others"))
+
+# reorder factor levels
+gapminder <- gapminder %>%
+  mutate(group = factor(group, levels = c("Others", "Latin America", "East Asia", "Sub-Saharan Africa", "West")))
+
+
+# note you must redefine p with the new gapminder object first
+p <- gapminder %>%
+  filter(year %in% c(past_year, present_year) & country %in% country_list) %>%
+  ggplot(aes(dollars_per_day, fill = group)) +
+  scale_x_continuous(trans = "log2")
+
+# stacked density plot
+p + geom_density(alpha = 0.2, bw = 0.75, position = "stack") +
+  facet_grid(year ~ .)
+
+
+# weighted stacked density plot
+gapminder %>%
+  filter(year %in% c(past_year, present_year) & country %in% country_list) %>%
+  group_by(year) %>%
+  mutate(weight = population/sum(population*2)) %>%
+  ungroup() %>%
+  ggplot(aes(dollars_per_day, fill = group, weight = weight)) +
+  scale_x_continuous(trans = "log2") +
+  geom_density(alpha = 0.2, bw = 0.75, position = "stack") + facet_grid(year ~ .)
+
+
+
+
+
+
+
+
+
+
+
 #Section 5: Data Visualization Principles-------------------
 ##5.1 Data Visualization Principles, Part 1-----------------
 ##5.2 Data Visualization Principles, Part 2-----------------
@@ -585,3 +976,180 @@ class(us_murder_rate)
 ## Assessment: Titanic Survival-----------------------------
 #Comprehensive Assessment-----------------------------------
 
+### Question 1
+library(tidyverse)
+library(dslabs)
+data(stars)
+options(digits = 3)
+
+str(stars)
+mean(stars$magnitude)
+sd(stars$magnitude)
+
+
+library(ggplot2)
+
+stars%>%ggplot(aes(magnitude))+geom_density()
+
+stars%>%ggplot(aes(temp)) + geom_density()
+
+stars%>%ggplot(aes(log10(temp), magnitude, color=type, 
+                   label=star)) + geom_point() + 
+  scale_y_reverse() + 
+  scale_x_reverse() + geom_text_repel()
+
+
+### Question 2
+
+library(tidyverse)
+library(dslabs)
+data(temp_carbon)
+data(greenhouse_gases)
+data(historic_co2)
+
+head(temp_carbon)
+str(temp_carbon)
+names(temp_carbon)
+
+temp_carbon
+
+is.na(temp_carbon)
+
+temp_carbon$carbon_emissions[which.max(
+  temp_carbon$year & 
+  !is.na(temp_carbon$carbon_emissions))]
+
+temp_carbon %>%
+  .$year %>%
+  max()
+
+temp_carbon %>%
+  filter(!is.na(carbon_emissions)) %>%
+  pull(year) %>%
+  max()
+
+temp_carbon %>%
+  filter(!is.na(carbon_emissions)) %>%
+  max(year)
+
+temp_carbon %>%
+  filter(!is.na(carbon_emissions)) %>%
+  .$year %>%
+  max()
+
+temp_carbon %>%
+  filter(!is.na(carbon_emissions)) %>%
+  select(year) %>%
+  max()
+
+temp_carbon %>%
+  filter(!is.na(carbon_emissions)) %>%
+  max(.$year)
+
+
+p <- temp_carbon %>% ggplot(aes(year, carbon_emissions)) + geom_point()
+p
+
+p <- p + geom_vline(aes(xintercept = 0), col = "blue")
+p
+p <- p + geom_hline(aes(y = 0), col = "blue")
+p
+p <- p + geom_hline(aes(yintercept = 0, col = blue))
+p
+p <- p + geom_hline(aes(yintercept = 0), col = "blue")
+p
+
+
+p + ylim("Temperature anomaly (degrees C)") +
+  ggtitle("Temperature anomaly relative to 20th century mean, 1880-2018") +
+  geom_text(aes(x = 2000, y = 0.05, label = "20th century mean"), col = "blue")
+
+p + ylab("Temperature anomaly (degrees C)") +
+  ggtitle("Temperature anomaly relative to 20th century mean, 1880-2018") +
+  geom_text(aes(x = 2000, y = 0.05, label = "20th century mean", col = "blue"))
+
+p + ylab("Temperature anomaly (degrees C)") +
+  ggtitle("Temperature anomaly relative to 20th century mean, 1880-2018") +
+  geom_text(aes(x = 2000, y = 0.05, label = "20th century mean"), col = "blue")
+
+p + ylab("Temperature anomaly (degrees C)") +
+  title("Temperature anomaly relative to 20th century mean, 1880-2018") +
+  geom_text(aes(x = 2000, y = 0.05, label = "20th century mean"), col = "blue")
+
+rm(list=ls())
+
+p <- temp_carbon %>% ggplot(aes(year, temp_anomaly)) + geom_point() + geom_hline(aes(yintercept = 0), col = "blue") + ylab("Temperature anomaly (degrees C)") +
+  title("Temperature anomaly relative to 20th century mean, 1880-2018") +
+  geom_text(aes(x = 2000, y = 0.05, label = "20th century mean"), col = "blue")
+
+p
+
+p <- p + geom_density(aes(year, ocean_anomaly))
+p
+temp_carbon
+
+
+temp_carbon %>%
+  ggplot(aes(year, temp_anomaly)) +
+  geom_line() +
+  geom_line(aes(year, land_anomaly), col = "red") +
+  geom_line(aes(year, ocean_anomaly), col = "blue") +
+  ylab("Temperature anomaly (degrees C)") +
+  xlim(c(1880, 2018)) +
+  ggtitle("Temperature anomaly on land and ocean")
+
+
+
+
+library(tidyverse)
+library(dslabs)
+data(temp_carbon)
+data(greenhouse_gases)
+data(historic_co2)
+
+greenhouse_gases %>%
+  ggplot(aes(year, concentration)) +
+  geom_line() +
+  facet_grid(gas~., scales = "free") +
+  geom_vline(xintercept = 1850) +
+  ylab("Concentration (ch4/n2o ppb, co2 ppm)") +
+  ggtitle("Atmospheric greenhouse gas concentration by year, 0-2000")
+
+co2_time <- historic_co2 %>%
+  ggplot(aes(year, co2, color=source)) +
+  geom_line() + xlim(c(-800000, -775000))
+co2_time
+
+co2_time <- historic_co2 %>%
+  ggplot(aes(year, co2, color=source)) +
+  geom_line() + xlim(c(-375000, -330000))
+co2_time
+
+
+co2_time <- historic_co2 %>%
+  ggplot(aes(year, co2, color=source)) +
+  geom_line() + xlim(c(-140000, -120000))
+co2_time
+
+co2_time <- historic_co2 %>%
+  ggplot(aes(year, co2, color=source)) +
+  geom_line() + xlim(c(-3000, 2018))
+co2_time
+
+install.packages("titanic")
+
+library(titanic)
+
+options(digits = 3)    # report 3 significant digits
+library(tidyverse)
+library(titanic)
+
+titanic <- titanic_train %>%
+  select(Survived, Pclass, Sex, Age, SibSp, Parch, Fare) %>%
+  mutate(Survived = factor(Survived),
+         Pclass = factor(Pclass),
+         Sex = factor(Sex))
+
+?titanic_train
+
+head(titanic_train)
